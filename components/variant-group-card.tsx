@@ -7,16 +7,17 @@ import { Badge } from './ui/badge'
 import { Textarea } from './ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { VariantGroup } from '@/lib/types'
-import { Check, X, ChevronDown, ChevronUp, Package, AlertCircle, Sparkles, Scale, Info } from 'lucide-react'
+import { Check, X, ChevronDown, ChevronUp, Package, AlertCircle, Sparkles, Scale, Info, Edit2, RotateCcw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface VariantGroupCardProps {
   group: VariantGroup
   onApprove: (groupId: string) => void
   onReject: (groupId: string, reason: string, feedback: string) => void
+  onUndo?: (groupId: string) => void
 }
 
-export function VariantGroupCard({ group, onApprove, onReject }: VariantGroupCardProps) {
+export function VariantGroupCard({ group, onApprove, onReject, onUndo }: VariantGroupCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
@@ -123,7 +124,7 @@ export function VariantGroupCard({ group, onApprove, onReject }: VariantGroupCar
               className="mb-2 transition-all hover:bg-primary/10"
             >
               {isExpanded ? (
-                <>Hide Variants <ChevronUp className="ml-2 h-4 w-4 transition-transform" /></>
+                <>Hide {group.variant_count} Variants <ChevronUp className="ml-2 h-4 w-4 transition-transform" /></>
               ) : (
                 <>Show {group.variant_count} Variants <ChevronDown className="ml-2 h-4 w-4 transition-transform" /></>
               )}
@@ -318,6 +319,30 @@ export function VariantGroupCard({ group, onApprove, onReject }: VariantGroupCar
           <div className="text-sm text-muted-foreground">
             {group.reviewer_email && `Last reviewed by ${group.reviewer_email}`}
           </div>
+        </CardFooter>
+      )}
+
+      {(group.review_status === 'approved' || group.review_status === 'rejected') && (
+        <CardFooter className="flex justify-between bg-muted/30">
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              {group.review_status === 'approved' ? 'Approved' : 'Rejected'} by {group.reviewer_email || 'Unknown'}
+              {group.review_date && ` on ${new Date(group.review_date).toLocaleDateString()}`}
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (onUndo) {
+                onUndo(group.id);
+              }
+            }}
+            className="flex items-center gap-1.5 hover:bg-background"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Undo Review
+          </Button>
         </CardFooter>
       )}
     </Card>

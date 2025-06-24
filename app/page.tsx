@@ -124,6 +124,23 @@ export default function ReviewPage() {
     localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
   }
 
+  const handleUndo = (groupId: string) => {
+    const updatedGroups = groups.map(g => {
+      if (g.id === groupId) {
+        // Create a new object without review-related fields
+        const { reviewer_email, review_date, rejection_reason, feedback, ...rest } = g
+        return {
+          ...rest,
+          review_status: 'pending' as const
+        }
+      }
+      return g
+    })
+    setGroups(updatedGroups)
+    updateStats(updatedGroups)
+    localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
+  }
+
   const exportResults = () => {
     const exportData = {
       metadata: {
@@ -394,6 +411,7 @@ export default function ReviewPage() {
                 group={group}
                 onApprove={handleApprove}
                 onReject={handleReject}
+                onUndo={handleUndo}
               />
             </div>
           ))}
