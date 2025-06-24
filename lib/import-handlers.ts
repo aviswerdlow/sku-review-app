@@ -195,6 +195,7 @@ function convertVariant(variant: any): ProductVariant {
   return {
     sku: variant.sku,
     title: displayTitle,
+    original_title: originalTitle || undefined,  // Preserve original title if different
     attributes: {
       base_product: extractBaseProduct(titleForAttributes),
       ...weightInfo,

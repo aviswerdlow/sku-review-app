@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Textarea } from './ui/textarea'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { VariantGroup } from '@/lib/types'
-import { Check, X, ChevronDown, ChevronUp, Package, AlertCircle, Sparkles, Scale } from 'lucide-react'
+import { Check, X, ChevronDown, ChevronUp, Package, AlertCircle, Sparkles, Scale, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface VariantGroupCardProps {
@@ -138,7 +139,28 @@ export function VariantGroupCard({ group, onApprove, onReject }: VariantGroupCar
                       </span>
                       <div className="flex-1">
                         <div className="font-medium text-foreground">
-                          {variant.title || `Product ${variant.sku}`}
+                          {variant.original_title ? (
+                            <TooltipProvider>
+                              <Tooltip delayDuration={300}>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center gap-1.5 cursor-help">
+                                    <span>{variant.title}</span>
+                                    <Info className="h-3 w-3 text-muted-foreground/70" />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-md p-3">
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-semibold text-primary">Original Product Title:</p>
+                                    <p className="text-xs font-normal text-foreground/90 leading-relaxed">
+                                      {variant.original_title}
+                                    </p>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            <span>{variant.title || `Product ${variant.sku}`}</span>
+                          )}
                         </div>
                         <code className="text-xs bg-muted px-2 py-0.5 rounded inline-block mt-1">{variant.sku}</code>
                       </div>

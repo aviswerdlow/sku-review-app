@@ -3,6 +3,7 @@
 export interface ProductVariant {
   sku: string;
   title: string;
+  original_title?: string;  // Added to store the original product title
   attributes?: {
     base_product: string;
     weight?: number;
