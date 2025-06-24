@@ -170,6 +170,11 @@ function convertVariant(variant: any): ProductVariant {
   const title = variant.title || variant.display_name || '';
   const weightInfo = extractWeight(title);
   
+  // Debug logging
+  if (!title) {
+    console.warn(`Variant ${variant.sku} has no title. Variant data:`, variant);
+  }
+  
   return {
     sku: variant.sku,
     title: title,
@@ -187,7 +192,11 @@ function convertVariant(variant: any): ProductVariant {
 export function importNotebookJSON(data: NotebookJSON): VariantGroup[] {
   const groups: VariantGroup[] = [];
   
+  console.log('Importing notebook JSON with', data.groups.length, 'groups');
+  
   data.groups.forEach((group, index) => {
+    console.log(`Processing group ${index}: ${group.parent_title} with ${group.variants.length} variants`);
+    
     // Convert variants
     const variants = group.variants.map(convertVariant);
     
