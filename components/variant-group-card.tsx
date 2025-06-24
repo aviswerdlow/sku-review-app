@@ -124,9 +124,9 @@ export function VariantGroupCard({ group, onApprove, onReject, onUndo }: Variant
               className="mb-2 transition-all hover:bg-primary/10"
             >
               {isExpanded ? (
-                <>Hide {group.variant_count} Variants <ChevronUp className="ml-2 h-4 w-4 transition-transform" /></>
+                <>Hide {group.variants?.length || group.variant_count} Variants <ChevronUp className="ml-2 h-4 w-4 transition-transform" /></>
               ) : (
-                <>Show {group.variant_count} Variants <ChevronDown className="ml-2 h-4 w-4 transition-transform" /></>
+                <>Show {group.variants?.length || group.variant_count} Variants <ChevronDown className="ml-2 h-4 w-4 transition-transform" /></>
               )}
             </Button>
             
