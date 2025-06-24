@@ -6,6 +6,7 @@ import { ReviewStatsComponent } from '@/components/review-stats'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { VariantGroup, ReviewStats } from '@/lib/types'
+import { importJSON } from '@/lib/import-handlers'
 import { Download, Upload, Filter, Search, Keyboard, Info, LogOut, User } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
@@ -59,19 +60,36 @@ export default function ReviewPage() {
       reader.onload = (e) => {
         try {
           const data = JSON.parse(e.target?.result as string)
-          // Transform data to include review fields
-          const transformedGroups: VariantGroup[] = data.groups.map((g: any, idx: number) => ({
-            ...g,
-            id: `group-${idx}`,
-            review_status: 'pending',
-            variants: g.variants || []
-          }))
+          
+          // Use the new import handler
+          const importResult = importJSON(data)
+          const transformedGroups = importResult.groups
+          
           setGroups(transformedGroups)
           updateStats(transformedGroups)
+          
+          // Update metadata if available
+          if (importResult.metadata) {
+            setStats(prev => ({
+              ...prev,
+              total_products: importResult.metadata.total_products || prev.total_products,
+              grouping_rate: importResult.metadata.grouping_rate || prev.grouping_rate,
+              grouped_products: importResult.metadata.grouped_products || 
+                transformedGroups.reduce((sum, g) => sum + g.variants.length, 0)
+            }))
+          }
+          
           // Save to localStorage
           localStorage.setItem('variant-groups', JSON.stringify(transformedGroups))
+          
+          // Show success message with format info
+          const formatInfo = importResult.format === 'notebook' 
+            ? 'Notebook JSON format detected and imported successfully!'
+            : 'LangChain JSON format detected and imported successfully!'
+          alert(formatInfo)
         } catch (error) {
-          alert('Error parsing JSON file. Please check the format.')
+          console.error('Import error:', error)
+          alert(`Error importing file: ${error instanceof Error ? error.message : 'Unknown error'}`)
         }
       }
       reader.readAsText(file)

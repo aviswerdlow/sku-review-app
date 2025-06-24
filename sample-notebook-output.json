@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "generated": "2025-06-24T00:50:38.123456",
+    "export_version": "2.0",
+    "processing_method": "enhanced",
+    "stats": {
+      "total_products": 854,
+      "products_grouped": 412,
+      "groups_created": 191,
+      "grouping_rate": 48.2,
+      "avg_group_size": 2.16,
+      "unknown_products": 125
+    }
+  },
+  "groups": [
+    {
+      "parent_sku": "PARENT-0",
+      "parent_title": "Ground Beef 90/10",
+      "variant_count": 4,
+      "grouping_rationale": "All 90/10 ground beef products, including both regular and Passover variants, 1lb and 5lb packages",
+      "skus": ["1-00-11-1", "1-00-11-3", "Y-1-00-11-1", "Y-1-00-11-3"],
+      "variants": [
+        {
+          "sku": "1-00-11-1",
+          "title": "1 lb. Pack Ground Beef Extra Lean 90/10, Uncooked, Vacuum"
+        },
+        {
+          "sku": "1-00-11-3",
+          "title": "5 lb. BULK PACK Ground Beef Extra Lean, Uncooked, Fresh, Vacuum"
+        },
+        {
+          "sku": "Y-1-00-11-1",
+          "title": "1 lb. Pack Ground Beef Extra Lean 90/10, Uncooked, Vacuum - Kosher for Passover"
+        },
+        {
+          "sku": "Y-1-00-11-3",
+          "title": "5 lb. BULK PACK Ground Beef Extra Lean, Uncooked, Fresh, Vacuum - Kosher for Passover"
+        }
+      ]
+    },
+    {
+      "parent_sku": "PARENT-1",
+      "parent_title": "Ribeye Steak, Boneless",
+      "variant_count": 5,
+      "grouping_rationale": "All boneless ribeye steaks, regardless of size, origin, or supplier",
+      "skus": ["3-01-10-1", "3-01-10-2", "3-01-10-3", "Y-3-01-10-1", "3-01-10-4"],
+      "variants": [
+        {
+          "sku": "3-01-10-1",
+          "title": "Ribeye Steak, Boneless, 10-12 oz"
+        },
+        {
+          "sku": "3-01-10-2",
+          "title": "Ribeye Steak, Boneless, 14-16 oz, Center Cut"
+        },
+        {
+          "sku": "3-01-10-3",
+          "title": "Ribeye Steak, Boneless, 8-10 oz"
+        },
+        {
+          "sku": "Y-3-01-10-1",
+          "title": "Ribeye Steak, Boneless, 10-12 oz - Kosher for Passover"
+        },
+        {
+          "sku": "3-01-10-4",
+          "title": "Ribeye Steak, Boneless, Grass Fed, 12 oz"
+        }
+      ]
+    },
+    {
+      "parent_sku": "PARENT-2",
+      "parent_title": "Beef Hot Dogs",
+      "variant_count": 4,
+      "grouping_rationale": "All beef hot dogs, varying by package size and Passover status",
+      "skus": ["5-00-01-1", "5-00-01-2", "Y-5-00-01-1", "5-00-01-3"],
+      "variants": [
+        {
+          "sku": "5-00-01-1",
+          "title": "Beef Hot Dogs, 12 oz Package (8 count)"
+        },
+        {
+          "sku": "5-00-01-2",
+          "title": "Beef Hot Dogs, 1 lb Package (10 count)"
+        },
+        {
+          "sku": "Y-5-00-01-1",
+          "title": "Beef Hot Dogs, 12 oz Package - Kosher for Passover"
+        },
+        {
+          "sku": "5-00-01-3",
+          "title": "Beef Hot Dogs, Natural Casing, 14 oz"
+        }
+      ]
+    },
+    {
+      "parent_sku": "PARENT-3",
+      "parent_title": "Chicken Breast, Boneless Skinless",
+      "variant_count": 6,
+      "grouping_rationale": "Raw boneless skinless chicken breasts/cutlets/tenders, uncooked",
+      "skus": ["7-01-01-1", "7-01-01-2", "7-01-01-3", "Y-7-01-01-1", "7-01-01-4", "7-01-01-5"],
+      "variants": [
+        {
+          "sku": "7-01-01-1",
+          "title": "Chicken Breast, Boneless Skinless, 1 lb Pack"
+        },
+        {
+          "sku": "7-01-01-2",
+          "title": "Chicken Breast, Boneless Skinless, Family Pack 3-4 lbs"
+        },
+        {
+          "sku": "7-01-01-3",
+          "title": "Chicken Cutlets, Thin Sliced, 1.5 lb Pack"
+        },
+        {
+          "sku": "Y-7-01-01-1",
+          "title": "Chicken Breast, Boneless Skinless, 1 lb - Kosher for Passover"
+        },
+        {
+          "sku": "7-01-01-4",
+          "title": "Chicken Tenders, 1 lb Pack"
+        },
+        {
+          "sku": "7-01-01-5",
+          "title": "Organic Chicken Breast, Boneless Skinless, 1.25 lb"
+        }
+      ]
+    }
+  ],
+  "passover_filter": [
+    {
+      "sku": "1-00-12-1",
+      "title": "1 lb. Pack Ground Beef, 85/15, Uncooked, Vacuum",
+      "filter": "kosher_for_passover"
+    },
+    {
+      "sku": "3-01-10-1",
+      "title": "Ribeye Steak, Boneless, 10-12 oz",
+      "filter": "kosher_for_passover"
+    }
+  ],
+  "ungrouped_products": [
+    {
+      "sku": "9-99-99-1",
+      "title": "Special Soup Mix, Assorted Bones"
+    },
+    {
+      "sku": "9-99-99-2",
+      "title": "Mystery Meat Special"
+    }
+  ]
+}
