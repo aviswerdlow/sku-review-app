@@ -7,7 +7,7 @@ import { Badge } from './ui/badge'
 import { Textarea } from './ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { VariantGroup } from '@/lib/types'
-import { Check, X, ChevronDown, ChevronUp, Package, AlertCircle, Sparkles, Scale, Info, Edit2, RotateCcw } from 'lucide-react'
+import { Check, X, ChevronDown, ChevronUp, Package, AlertCircle, Sparkles, Scale, Info, Edit2, RotateCcw, Save, XCircle, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface VariantGroupCardProps {
@@ -15,14 +15,39 @@ interface VariantGroupCardProps {
   onApprove: (groupId: string) => void
   onReject: (groupId: string, reason: string, feedback: string) => void
   onUndo?: (groupId: string) => void
+  onEditParentTitle?: (groupId: string, newTitle: string) => void
+  onEditVariantTitle?: (groupId: string, variantSku: string, newTitle: string) => void
+  onRemoveVariant?: (groupId: string, variantSku: string, reason: string, suggestedAction?: string, notes?: string) => void
 }
 
-export function VariantGroupCard({ group, onApprove, onReject, onUndo }: VariantGroupCardProps) {
+export function VariantGroupCard({ 
+  group, 
+  onApprove, 
+  onReject, 
+  onUndo,
+  onEditParentTitle,
+  onEditVariantTitle,
+  onRemoveVariant 
+}: VariantGroupCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
   const [feedback, setFeedback] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+  
+  // Editing states
+  const [isEditingParent, setIsEditingParent] = useState(false)
+  const [editedParentTitle, setEditedParentTitle] = useState(group.parent_title_edited || group.parent_title)
+  const [editingVariantSku, setEditingVariantSku] = useState<string | null>(null)
+  const [editedVariantTitles, setEditedVariantTitles] = useState<Record<string, string>>({})
+  const [hoveredParent, setHoveredParent] = useState(false)
+  const [hoveredVariant, setHoveredVariant] = useState<string | null>(null)
+  
+  // Removal states
+  const [removingVariantSku, setRemovingVariantSku] = useState<string | null>(null)
+  const [removalReason, setRemovalReason] = useState('')
+  const [removalAction, setRemovalAction] = useState<string>('')
+  const [removalNotes, setRemovalNotes] = useState('')
 
   const handleApprove = async () => {
     setIsProcessing(true)
@@ -87,16 +112,88 @@ export function VariantGroupCard({ group, onApprove, onReject, onUndo }: Variant
           <div className="flex-1">
             <CardTitle className="text-xl flex items-center gap-2">
               <Package className="h-5 w-5 text-muted-foreground" />
-              {group.parent_title}
+              {isEditingParent ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <input
+                    type="text"
+                    value={editedParentTitle}
+                    onChange={(e) => setEditedParentTitle(e.target.value)}
+                    className="flex-1 px-2 py-1 text-xl font-semibold bg-background border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (onEditParentTitle && editedParentTitle !== group.parent_title) {
+                          onEditParentTitle(group.id, editedParentTitle)
+                        }
+                        setIsEditingParent(false)
+                      } else if (e.key === 'Escape') {
+                        setEditedParentTitle(group.parent_title_edited || group.parent_title)
+                        setIsEditingParent(false)
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      if (onEditParentTitle && editedParentTitle !== group.parent_title) {
+                        onEditParentTitle(group.id, editedParentTitle)
+                      }
+                      setIsEditingParent(false)
+                    }}
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setEditedParentTitle(group.parent_title_edited || group.parent_title)
+                      setIsEditingParent(false)
+                    }}
+                  >
+                    <XCircle className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className="flex items-center gap-2 flex-1"
+                  onMouseEnter={() => setHoveredParent(true)}
+                  onMouseLeave={() => setHoveredParent(false)}
+                >
+                  <span>{group.parent_title_edited || group.parent_title}</span>
+                  {group.parent_title_edited && (
+                    <Badge variant="secondary" className="text-xs">edited</Badge>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className={cn(
+                      "h-6 w-6 p-0 transition-opacity",
+                      hoveredParent ? "opacity-100" : "opacity-0"
+                    )}
+                    onClick={() => setIsEditingParent(true)}
+                  >
+                    <Edit2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
             </CardTitle>
-            <CardDescription className="mt-2 flex items-center gap-4">
-              <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">
-                {group.parent_sku}
-              </span>
-              <span className="flex items-center gap-1">
-                <Scale className="h-3 w-3" />
-                {group.variant_count} variants
-              </span>
+            <CardDescription className="mt-2">
+              <div className="flex items-center gap-4">
+                <span className="font-mono text-xs bg-muted px-2 py-0.5 rounded">
+                  {group.parent_sku}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Scale className="h-3 w-3" />
+                  {group.variant_count} variants
+                </span>
+              </div>
+              {group.parent_title_edited && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  Original: {group.parent_title}
+                </div>
+              )}
             </CardDescription>
           </div>
           <div className="flex gap-2">
@@ -113,7 +210,7 @@ export function VariantGroupCard({ group, onApprove, onReject, onUndo }: Variant
               <Sparkles className="h-4 w-4 text-primary" />
               AI Reasoning
             </h4>
-            <p className="text-sm text-muted-foreground italic">"{group.reasoning}"</p>
+            <p className="text-sm text-muted-foreground italic">&ldquo;{group.reasoning}&rdquo;</p>
           </div>
 
           <div>
@@ -140,27 +237,153 @@ export function VariantGroupCard({ group, onApprove, onReject, onUndo }: Variant
                       </span>
                       <div className="flex-1">
                         <div className="font-medium text-foreground">
-                          {variant.original_title ? (
-                            <TooltipProvider>
-                              <Tooltip delayDuration={300}>
-                                <TooltipTrigger asChild>
-                                  <div className="flex items-center gap-1.5 cursor-help">
-                                    <span>{variant.title}</span>
-                                    <Info className="h-3 w-3 text-muted-foreground/70" />
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-md p-3 bg-popover border">
-                                  <div className="space-y-1">
-                                    <p className="text-xs font-semibold">Original Product Title:</p>
-                                    <p className="text-xs font-normal leading-relaxed break-words">
-                                      {variant.original_title}
-                                    </p>
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                          {editingVariantSku === variant.sku ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={editedVariantTitles[variant.sku] ?? variant.title}
+                                onChange={(e) => setEditedVariantTitles(prev => ({ ...prev, [variant.sku]: e.target.value }))}
+                                className="flex-1 px-2 py-1 text-sm bg-background border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const newTitle = editedVariantTitles[variant.sku] ?? variant.title
+                                    if (onEditVariantTitle && newTitle !== variant.title) {
+                                      onEditVariantTitle(group.id, variant.sku, newTitle)
+                                    }
+                                    setEditingVariantSku(null)
+                                  } else if (e.key === 'Escape') {
+                                    setEditedVariantTitles(prev => {
+                                      const { [variant.sku]: _, ...rest } = prev
+                                      return rest
+                                    })
+                                    setEditingVariantSku(null)
+                                  }
+                                }}
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0"
+                                onClick={() => {
+                                  const newTitle = editedVariantTitles[variant.sku] ?? variant.title
+                                  if (onEditVariantTitle && newTitle !== variant.title) {
+                                    onEditVariantTitle(group.id, variant.sku, newTitle)
+                                  }
+                                  setEditingVariantSku(null)
+                                }}
+                              >
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0"
+                                onClick={() => {
+                                  setEditedVariantTitles(prev => {
+                                    const { [variant.sku]: _, ...rest } = prev
+                                    return rest
+                                  })
+                                  setEditingVariantSku(null)
+                                }}
+                              >
+                                <XCircle className="h-3 w-3" />
+                              </Button>
+                            </div>
                           ) : (
-                            <span>{variant.title || `Product ${variant.sku}`}</span>
+                            <div 
+                              onMouseEnter={() => setHoveredVariant(variant.sku)}
+                              onMouseLeave={() => setHoveredVariant(null)}
+                            >
+                              {variant.original_title ? (
+                                <TooltipProvider>
+                                  <Tooltip delayDuration={300}>
+                                    <TooltipTrigger asChild>
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="cursor-help">{variant.title_edited || variant.title}</span>
+                                        {variant.title_edited && (
+                                          <Badge variant="secondary" className="text-xs h-4 px-1">edited</Badge>
+                                        )}
+                                        <Info className="h-3 w-3 text-muted-foreground/70" />
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className={cn(
+                                            "h-5 w-5 p-0 ml-1 transition-opacity",
+                                            hoveredVariant === variant.sku ? "opacity-100" : "opacity-0"
+                                          )}
+                                          onClick={() => {
+                                            setEditingVariantSku(variant.sku)
+                                            setEditedVariantTitles(prev => ({ ...prev, [variant.sku]: variant.title_edited || variant.title }))
+                                          }}
+                                        >
+                                          <Edit2 className="h-3 w-3" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className={cn(
+                                            "h-5 w-5 p-0 transition-opacity",
+                                            hoveredVariant === variant.sku ? "opacity-100" : "opacity-0"
+                                          )}
+                                          onClick={() => setRemovingVariantSku(variant.sku)}
+                                        >
+                                          <Trash2 className="h-3 w-3 text-destructive" />
+                                        </Button>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-md p-3 bg-popover border">
+                                      <div className="space-y-1">
+                                        <p className="text-xs font-semibold">Original Product Title:</p>
+                                        <p className="text-xs font-normal leading-relaxed break-words">
+                                          {variant.original_title}
+                                        </p>
+                                        {variant.title_edited && (
+                                          <>
+                                            <p className="text-xs font-semibold mt-2">AI Generated Title:</p>
+                                            <p className="text-xs font-normal leading-relaxed break-words">
+                                              {variant.title}
+                                            </p>
+                                          </>
+                                        )}
+                                      </div>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                <div className="flex items-center gap-1">
+                                  <span>{variant.title_edited || variant.title || `Product ${variant.sku}`}</span>
+                                  {variant.title_edited && (
+                                    <Badge variant="secondary" className="text-xs h-4 px-1">edited</Badge>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className={cn(
+                                      "h-5 w-5 p-0 ml-1 transition-opacity",
+                                      hoveredVariant === variant.sku ? "opacity-100" : "opacity-0"
+                                    )}
+                                    onClick={() => {
+                                      setEditingVariantSku(variant.sku)
+                                      setEditedVariantTitles(prev => ({ ...prev, [variant.sku]: variant.title_edited || variant.title }))
+                                    }}
+                                  >
+                                    <Edit2 className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className={cn(
+                                      "h-5 w-5 p-0 transition-opacity",
+                                      hoveredVariant === variant.sku ? "opacity-100" : "opacity-0"
+                                    )}
+                                    onClick={() => setRemovingVariantSku(variant.sku)}
+                                  >
+                                    <Trash2 className="h-3 w-3 text-destructive" />
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                         <code className="text-xs bg-muted px-2 py-0.5 rounded inline-block mt-1">{variant.sku}</code>
@@ -201,6 +424,73 @@ export function VariantGroupCard({ group, onApprove, onReject, onUndo }: Variant
               </div>
             )}
           </div>
+
+          {removingVariantSku && (
+            <div className="border-2 border-destructive/50 rounded-lg p-4 space-y-3 bg-destructive/5 animate-in slide-in-from-top-2 duration-200">
+              <h4 className="font-semibold flex items-center gap-2 text-destructive">
+                <Trash2 className="h-4 w-4" />
+                Remove Product from Group
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Removing: <span className="font-medium">{group.variants.find(v => v.sku === removingVariantSku)?.title}</span>
+              </p>
+              <div>
+                <label className="text-sm font-medium mb-1 block">
+                  Reason for removal *
+                </label>
+                <select
+                  value={removalAction}
+                  onChange={(e) => setRemovalAction(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-background border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select a reason...</option>
+                  <option value="different_group">Should be in a different group</option>
+                  <option value="ungrouped">Should not be grouped</option>
+                  <option value="invalid_product">Invalid/discontinued product</option>
+                  <option value="other">Other reason</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">
+                  Additional notes
+                </label>
+                <Textarea
+                  value={removalNotes}
+                  onChange={(e) => setRemovalNotes(e.target.value)}
+                  placeholder="e.g., This is a different cut than the other products"
+                  className="min-h-[60px]"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => {
+                    if (onRemoveVariant && removalAction) {
+                      onRemoveVariant(group.id, removingVariantSku, removalAction, removalAction, removalNotes)
+                    }
+                    setRemovingVariantSku(null)
+                    setRemovalAction('')
+                    setRemovalNotes('')
+                  }}
+                  disabled={!removalAction}
+                >
+                  Remove Product
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setRemovingVariantSku(null)
+                    setRemovalAction('')
+                    setRemovalNotes('')
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
 
           {group.common_attributes && Object.keys(group.common_attributes).length > 0 && (
             <div>
