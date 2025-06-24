@@ -10,8 +10,8 @@ interface NotebookGroup {
   variants: Array<{
     sku: string;
     title?: string;
-    weight?: string;
-    display_name?: string;
+    weight?: string;  // AI-generated cleaned variant name
+    display_name?: string;  // Alternative cleaned name field
     [key: string]: any;
   }>;
 }
@@ -167,23 +167,40 @@ function isOrganic(title: string): boolean {
 
 // Convert notebook variant to app variant format
 function convertVariant(variant: any): ProductVariant {
-  const title = variant.title || variant.display_name || '';
-  const weightInfo = extractWeight(title);
+  // The notebook export structure:
+  // - 'weight' field: AI-generated cleaned variant name (e.g., "1 lb Pack", "5 lb Bulk")
+  // - 'display_name': Alternative cleaned name field
+  // - 'title': Original product title from CSV
   
-  // Debug logging
-  if (!title) {
-    console.warn(`Variant ${variant.sku} has no title. Variant data:`, variant);
-  }
+  const cleanedName = variant.weight || variant.display_name || '';
+  const originalTitle = variant.title || '';
+  
+  // Use cleaned name for display, but extract attributes from original title
+  const displayTitle = cleanedName || originalTitle || `Product ${variant.sku}`;
+  const titleForAttributes = originalTitle || cleanedName;
+  
+  // Extract attributes from the original title for accuracy
+  const weightInfo = extractWeight(titleForAttributes);
+  
+  // Debug logging to see what fields are available
+  console.log(`Variant ${variant.sku}:`, {
+    cleanedName,
+    originalTitle,
+    displayTitle,
+    hasWeight: !!variant.weight,
+    hasDisplayName: !!variant.display_name,
+    hasTitle: !!variant.title
+  });
   
   return {
     sku: variant.sku,
-    title: title,
+    title: displayTitle,
     attributes: {
-      base_product: extractBaseProduct(title),
+      base_product: extractBaseProduct(titleForAttributes),
       ...weightInfo,
-      preparation: extractPreparation(title),
-      kosher: isKosher(title, variant.sku),
-      organic: isOrganic(title)
+      preparation: extractPreparation(titleForAttributes),
+      kosher: isKosher(titleForAttributes, variant.sku),
+      organic: isOrganic(titleForAttributes)
     }
   };
 }
@@ -193,6 +210,12 @@ export function importNotebookJSON(data: NotebookJSON): VariantGroup[] {
   const groups: VariantGroup[] = [];
   
   console.log('Importing notebook JSON with', data.groups.length, 'groups');
+  
+  // Log sample variant to see available fields
+  if (data.groups.length > 0 && data.groups[0].variants.length > 0) {
+    console.log('Sample variant fields:', Object.keys(data.groups[0].variants[0]));
+    console.log('Sample variant data:', data.groups[0].variants[0]);
+  }
   
   data.groups.forEach((group, index) => {
     console.log(`Processing group ${index}: ${group.parent_title} with ${group.variants.length} variants`);

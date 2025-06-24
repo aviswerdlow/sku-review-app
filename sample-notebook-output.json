@@ -22,19 +22,23 @@
       "variants": [
         {
           "sku": "1-00-11-1",
-          "title": "1 lb. Pack Ground Beef Extra Lean 90/10, Uncooked, Vacuum"
+          "title": "1 lb. Pack Ground Beef Extra Lean 90/10, Uncooked, Vacuum",
+          "weight": "1 lb Pack"
         },
         {
           "sku": "1-00-11-3",
-          "title": "5 lb. BULK PACK Ground Beef Extra Lean, Uncooked, Fresh, Vacuum"
+          "title": "5 lb. BULK PACK Ground Beef Extra Lean, Uncooked, Fresh, Vacuum",
+          "weight": "5 lb Bulk Pack"
         },
         {
           "sku": "Y-1-00-11-1",
-          "title": "1 lb. Pack Ground Beef Extra Lean 90/10, Uncooked, Vacuum - Kosher for Passover"
+          "title": "1 lb. Pack Ground Beef Extra Lean 90/10, Uncooked, Vacuum - Kosher for Passover",
+          "weight": "1 lb Pack (Passover)"
         },
         {
           "sku": "Y-1-00-11-3",
-          "title": "5 lb. BULK PACK Ground Beef Extra Lean, Uncooked, Fresh, Vacuum - Kosher for Passover"
+          "title": "5 lb. BULK PACK Ground Beef Extra Lean, Uncooked, Fresh, Vacuum - Kosher for Passover",
+          "weight": "5 lb Bulk Pack (Passover)"
         }
       ]
     },
@@ -47,23 +51,28 @@
       "variants": [
         {
           "sku": "3-01-10-1",
-          "title": "Ribeye Steak, Boneless, 10-12 oz"
+          "title": "Ribeye Steak, Boneless, 10-12 oz",
+          "weight": "10-12 oz"
         },
         {
           "sku": "3-01-10-2",
-          "title": "Ribeye Steak, Boneless, 14-16 oz, Center Cut"
+          "title": "Ribeye Steak, Boneless, 14-16 oz, Center Cut",
+          "weight": "14-16 oz Center Cut"
         },
         {
           "sku": "3-01-10-3",
-          "title": "Ribeye Steak, Boneless, 8-10 oz"
+          "title": "Ribeye Steak, Boneless, 8-10 oz",
+          "weight": "8-10 oz"
         },
         {
           "sku": "Y-3-01-10-1",
-          "title": "Ribeye Steak, Boneless, 10-12 oz - Kosher for Passover"
+          "title": "Ribeye Steak, Boneless, 10-12 oz - Kosher for Passover",
+          "weight": "10-12 oz (Passover)"
         },
         {
           "sku": "3-01-10-4",
-          "title": "Ribeye Steak, Boneless, Grass Fed, 12 oz"
+          "title": "Ribeye Steak, Boneless, Grass Fed, 12 oz",
+          "weight": "12 oz Grass Fed"
         }
       ]
     },
