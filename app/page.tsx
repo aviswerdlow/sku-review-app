@@ -29,17 +29,7 @@ export default function ReviewPage() {
     grouping_rate: 0
   })
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    const savedGroups = localStorage.getItem('variant-groups')
-    if (savedGroups) {
-      const parsedGroups = JSON.parse(savedGroups)
-      setGroups(parsedGroups)
-      updateStats(parsedGroups)
-    }
-  }, [])
-
-  const updateStats = (groupList: VariantGroup[]) => {
+  const updateStats = useCallback((groupList: VariantGroup[]) => {
     const grouped_products = groupList.reduce((sum, g) => sum + g.variant_count, 0)
     const newStats: ReviewStats = {
       total_groups: groupList.length,
@@ -51,7 +41,17 @@ export default function ReviewPage() {
       grouping_rate: (grouped_products / 854) * 100
     }
     setStats(newStats)
-  }
+  }, [])
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedGroups = localStorage.getItem('variant-groups')
+    if (savedGroups) {
+      const parsedGroups = JSON.parse(savedGroups)
+      setGroups(parsedGroups)
+      updateStats(parsedGroups)
+    }
+  }, [updateStats])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -96,7 +96,7 @@ export default function ReviewPage() {
     }
   }
 
-  const handleApprove = (groupId: string) => {
+  const handleApprove = useCallback((groupId: string) => {
     const updatedGroups = groups.map(g => 
       g.id === groupId 
         ? { ...g, review_status: 'approved' as const, review_date: new Date().toISOString() }
@@ -105,7 +105,7 @@ export default function ReviewPage() {
     setGroups(updatedGroups)
     updateStats(updatedGroups)
     localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
-  }
+  }, [groups, updateStats])
 
   const handleReject = (groupId: string, reason: string, feedback: string) => {
     const updatedGroups = groups.map(g => 
@@ -141,6 +141,86 @@ export default function ReviewPage() {
     localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
   }
 
+  const handleEditParentTitle = (groupId: string, newTitle: string) => {
+    const updatedGroups = groups.map(g => 
+      g.id === groupId 
+        ? { 
+            ...g, 
+            parent_title_edited: newTitle,
+            parent_title_edit_history: {
+              original: g.parent_title,
+              edited: newTitle,
+              edited_by: session?.user?.email || undefined,
+              edited_date: new Date().toISOString()
+            },
+            has_edits: true
+          }
+        : g
+    )
+    setGroups(updatedGroups)
+    localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
+  }
+
+  const handleEditVariantTitle = (groupId: string, variantSku: string, newTitle: string) => {
+    const updatedGroups = groups.map(g => {
+      if (g.id === groupId) {
+        const updatedVariants = g.variants.map(v => 
+          v.sku === variantSku
+            ? {
+                ...v,
+                title_edited: newTitle,
+                title_edit_history: {
+                  original: v.original_title || v.title,
+                  edited: newTitle,
+                  ai_generated: v.title,
+                  edited_by: session?.user?.email || undefined,
+                  edited_date: new Date().toISOString()
+                }
+              }
+            : v
+        )
+        return { ...g, variants: updatedVariants, has_edits: true }
+      }
+      return g
+    })
+    setGroups(updatedGroups)
+    localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
+  }
+
+  const handleRemoveVariant = (groupId: string, variantSku: string, reason: string, suggestedAction?: string, notes?: string) => {
+    const updatedGroups = groups.map(g => {
+      if (g.id === groupId) {
+        const variantToRemove = g.variants.find(v => v.sku === variantSku)
+        if (!variantToRemove) return g
+        
+        const updatedVariants = g.variants.filter(v => v.sku !== variantSku)
+        const removedVariant = {
+          ...variantToRemove,
+          is_removed: true,
+          removal_info: {
+            removed_by: session?.user?.email || undefined,
+            removed_date: new Date().toISOString(),
+            removal_reason: reason,
+            suggested_action: suggestedAction as any,
+            notes
+          }
+        }
+        
+        return {
+          ...g,
+          variants: updatedVariants,
+          variant_count: updatedVariants.length,
+          removed_variants: [...(g.removed_variants || []), removedVariant],
+          has_edits: true
+        }
+      }
+      return g
+    })
+    setGroups(updatedGroups)
+    updateStats(updatedGroups)
+    localStorage.setItem('variant-groups', JSON.stringify(updatedGroups))
+  }
+
   const exportResults = () => {
     const exportData = {
       metadata: {
@@ -148,7 +228,14 @@ export default function ReviewPage() {
         total_groups: stats.total_groups,
         approved: stats.approved,
         rejected: stats.rejected,
-        pending: stats.pending_review
+        pending: stats.pending_review,
+        groups_with_edits: groups.filter(g => g.has_edits).length,
+        total_edits: groups.reduce((sum, g) => {
+          let edits = g.parent_title_edited ? 1 : 0
+          edits += g.variants.filter(v => v.title_edited).length
+          return sum + edits
+        }, 0),
+        total_removals: groups.reduce((sum, g) => sum + (g.removed_variants?.length || 0), 0)
       },
       approved_groups: groups.filter(g => g.review_status === 'approved'),
       rejected_groups: groups.filter(g => g.review_status === 'rejected').map(g => ({
@@ -158,6 +245,16 @@ export default function ReviewPage() {
           feedback: g.feedback,
           review_date: g.review_date
         }
+      })),
+      edits: groups.filter(g => g.has_edits).map(g => ({
+        group_id: g.id,
+        parent_sku: g.parent_sku,
+        parent_title_edit: g.parent_title_edit_history,
+        variant_edits: g.variants.filter(v => v.title_edited).map(v => ({
+          sku: v.sku,
+          edit_history: v.title_edit_history
+        })),
+        removed_variants: g.removed_variants
       }))
     }
 
@@ -412,6 +509,9 @@ export default function ReviewPage() {
                 onApprove={handleApprove}
                 onReject={handleReject}
                 onUndo={handleUndo}
+                onEditParentTitle={handleEditParentTitle}
+                onEditVariantTitle={handleEditVariantTitle}
+                onRemoveVariant={handleRemoveVariant}
               />
             </div>
           ))}
