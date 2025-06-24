@@ -148,10 +148,10 @@ export function VariantGroupCard({ group, onApprove, onReject }: VariantGroupCar
                                     <Info className="h-3 w-3 text-muted-foreground/70" />
                                   </div>
                                 </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-md p-3">
-                                  <div className="space-y-2">
-                                    <p className="text-xs font-semibold text-primary">Original Product Title:</p>
-                                    <p className="text-xs font-normal text-foreground/90 leading-relaxed">
+                                <TooltipContent side="top" className="max-w-md p-3 bg-popover border">
+                                  <div className="space-y-1">
+                                    <p className="text-xs font-semibold">Original Product Title:</p>
+                                    <p className="text-xs font-normal leading-relaxed break-words">
                                       {variant.original_title}
                                     </p>
                                   </div>
