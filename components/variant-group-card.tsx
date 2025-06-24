@@ -131,24 +131,33 @@ export function VariantGroupCard({ group, onApprove, onReject }: VariantGroupCar
             {isExpanded && (
               <div className="border rounded-lg p-3 space-y-3 max-h-64 overflow-y-auto bg-background animate-in slide-in-from-top-2 duration-200">
                 {group.variants.map((variant, idx) => (
-                  <div key={variant.sku} className="text-sm p-2 rounded hover:bg-muted/50 transition-colors">
-                    <div className="font-medium flex items-center gap-2">
-                      <span className="text-xs bg-primary/20 text-primary rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  <div key={variant.sku} className="text-sm p-2 rounded hover:bg-muted/50 transition-colors border-l-2 border-transparent hover:border-primary">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs bg-primary/20 text-primary rounded-full h-5 w-5 flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
-                      <code className="text-xs bg-muted px-2 py-0.5 rounded">{variant.sku}</code>
+                      <div className="flex-1">
+                        <div className="font-medium text-foreground">
+                          {variant.title || `Product ${variant.sku}`}
+                        </div>
+                        <code className="text-xs bg-muted px-2 py-0.5 rounded inline-block mt-1">{variant.sku}</code>
+                      </div>
                     </div>
-                    <div className="text-muted-foreground ml-7 mt-1">{variant.title}</div>
                     {variant.attributes && (
                       <div className="flex flex-wrap gap-1 ml-7 mt-2">
+                        {variant.attributes.base_product && variant.attributes.base_product !== 'unknown' && (
+                          <Badge variant="default" className="text-xs py-0 h-5">
+                            {variant.attributes.base_product}
+                          </Badge>
+                        )}
                         {variant.attributes.weight && (
                           <Badge variant="outline" className="text-xs py-0 h-5">
-                            {variant.attributes.weight}{variant.attributes.weight_unit}
+                            {variant.attributes.weight} {variant.attributes.weight_unit || 'unit'}
                           </Badge>
                         )}
                         {variant.attributes.weight_min && (
                           <Badge variant="outline" className="text-xs py-0 h-5">
-                            {variant.attributes.weight_min}-{variant.attributes.weight_max}{variant.attributes.weight_unit}
+                            {variant.attributes.weight_min}-{variant.attributes.weight_max} {variant.attributes.weight_unit || 'unit'}
                           </Badge>
                         )}
                         {variant.attributes.preparation && (
